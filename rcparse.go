@@ -186,7 +186,7 @@ func parseFileSubtype(fileSubtypeObj interface{}) (uint32, error) {
 	}
 }
 
-func parseVersionResource(versionJson map[string]interface{}) (*Resource, error) {
+func parseVersionResource(versionJson map[string]interface{}, language gowin32.Language) (*Resource, error) {
 	fixedFileInfo := wrappers.VSFixedFileInfo{
 		Signature:     0xFEEF04BD,
 		FileFlagsMask: 0x0000003F,
@@ -257,31 +257,47 @@ func parseVersionResource(versionJson map[string]interface{}) (*Resource, error)
 				}
 			}
 		} else {
-			return nil, errors.New("stringFileInfo field must specify an object")
+			return nil, errors.New("field stringFileInfo must specify an object")
 		}
 	}
 	return &Resource{
 		Type: gowin32.ResourceTypeVersion,
 		Id:   1,
-		Data: EncodeVersionInfo(&fixedFileInfo, 0x409, 1200, stringFileInfo),
+		Data: EncodeVersionInfo(&fixedFileInfo, language, 1200, stringFileInfo),
 	}, nil
 }
 
-func ParseResources(jsonData map[string]interface{}) ([]*Resource, error) {
+func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resource, error) {
+	locale := gowin32.LocaleNeutral
+	if languageObj, ok := jsonData["language"]; ok {
+		if languageName, ok := languageObj.(string); ok {
+			if localeId, err := gowin32.LocaleFromLocaleName(languageName, 0); err != nil {
+				return 0, nil, errors.New(fmt.Sprintf("invalid language %s", languageName))
+			} else {
+				locale = localeId
+			}
+		} else {
+			return 0, nil, errors.New("field language must specify a string")
+		}
+	}
 	resources := make([]*Resource, 0)
 	for key, value := range jsonData {
 		switch key {
 		case "version":
 			if versionJson, ok := value.(map[string]interface{}); ok {
-				if versionRes, err := parseVersionResource(versionJson); err != nil {
-					return nil, err
+				if versionRes, err := parseVersionResource(versionJson, locale.Language()); err != nil {
+					return 0, nil, err
 				} else {
 					resources = append(resources, versionRes)
 				}
 			} else {
-				return nil, errors.New("version field must specify an object")
+				return 0, nil, errors.New("field version must specify an object")
 			}
+		case "language":
+			// handled above
+		default:
+			return 0, nil, errors.New(fmt.Sprintf("invalid resource type %s", key))
 		}
 	}
-	return resources, nil
+	return locale.Language(), resources, nil
 }

@@ -53,7 +53,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to parse JSON file: %s (%s)\n", args[0], err)
 		os.Exit(2)
 	}
-	resources, err := ParseResources(jsonData)
+	language, resources, err := ParseResources(jsonData)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "invalid resources in JSON file: %s (%s)\n", args[0], err)
 		os.Exit(2)
@@ -67,7 +67,7 @@ func main() {
 	defer update.Close()
 
 	for _, res := range resources {
-		if err := update.Update(res.Type, gowin32.IntResourceId(res.Id), 0x409, res.Data); err != nil {
+		if err := update.Update(res.Type, gowin32.IntResourceId(res.Id), language, res.Data); err != nil {
 			fmt.Fprintf(os.Stderr, "failed to update resource (%s)\n", err)
 			os.Exit(2)
 		}
