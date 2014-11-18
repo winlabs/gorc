@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package gorc
+package main
 
 import (
 	"github.com/winlabs/gowin32"
