@@ -25,6 +25,10 @@ import (
 	"os"
 )
 
+var (
+	discard = flag.Bool("discard", false, "discard any existing resources in the executable")
+)
+
 func usage() {
 	fmt.Fprintf(os.Stderr, "usage: gorc file.json file.exe\n")
 	flag.PrintDefaults()
@@ -59,7 +63,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	update, err := gowin32.NewResourceUpdate(args[1], false)
+	update, err := gowin32.NewResourceUpdate(args[1], *discard)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open executable file for resource update: %s (%s)\n", args[1], err)
 		os.Exit(2)
