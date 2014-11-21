@@ -99,7 +99,7 @@ func encodeString(key string, value string) []byte {
 	info.Type = 1
 	data := make([]byte, unsafe.Sizeof(info))
 	wrappers.RtlMoveMemory(&data[0], (*byte)(unsafe.Pointer(&info)), unsafe.Sizeof(info))
-	data = append(data,	stringToUTF16Bytes(key)...)
+	data = append(data, stringToUTF16Bytes(key)...)
 	data = append(data, make([]byte, 2 + paddingBytes1)...)
 	data = append(data, stringToUTF16Bytes(value)...)
 	return append(data, make([]byte, 2 + paddingBytes2)...)
