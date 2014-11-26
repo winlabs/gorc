@@ -1,9 +1,9 @@
 gorc
 ====
 
-This utility is a Win32 resource compiler written in Go.  It currently only supports version stamp resources,
-although support for other resource types may be added in the future.  It may be used to add resources to a Win32
-executable compiled from Go.  It is run on the executable after it is built and modifies it to add the resources.
+This utility is a Win32 resource compiler written in Go.  It currently only supports version stamp and message table
+resources, although support for other resource types may be added in the future.  It may be used to add resources to a
+Win32 executable compiled from Go.  It is run on the executable after it is built and modifies it to add the resources.
 
 ### Usage
 
@@ -24,6 +24,13 @@ are optional and may be omitted if not needed.
 
 	{
 		"language": "en-us",
+		"messageTable": [
+			{
+				"id": 1,
+				"severity": "Error", // also supported: "Success", "Informational", "Warning"
+				"messageText": "Hello, World!"
+			}
+		],
 		"version": {
 			"fileVersion": "1.0.0.0",
 			"productVersion": "1.0.0.0",

@@ -267,6 +267,70 @@ func parseVersionResource(versionJson map[string]interface{}, language gowin32.L
 	}, nil
 }
 
+func parseMessageSeverity(severityObj interface{}) (uint32, error) {
+	severityName, ok := severityObj.(string)
+	if !ok {
+		return 0, errors.New("field severity must specify a string")
+	}
+	switch severityName {
+	case "Success":
+		return 0x00000000, nil
+	case "Informational":
+		return 0x40000000, nil
+	case "Warning":
+		return 0x80000000, nil
+	case "Error":
+		return 0xC0000000, nil
+	default:
+		return 0, errors.New(fmt.Sprintf("invalid severity: %s", severityName))
+	}
+}
+
+func parseMessageTableResource(messageTableJson []interface{}) (*Resource, error) {
+	messages := make(map[uint32]string)
+	for _, messageObj := range messageTableJson {
+		messageJson, ok := messageObj.(map[string]interface{})
+		if !ok {
+			return nil, errors.New("field messageTable must specify a list of objects")
+		}
+		idObj, ok := messageJson["id"]
+		if !ok {
+			return nil, errors.New("field id is required")
+		}
+		idFloat, ok := idObj.(float64)
+		if !ok {
+			return nil, errors.New("field id must specify an integer")
+		}
+		id := uint32(idFloat)
+		severityObj, ok := messageJson["severity"]
+		if !ok {
+			return nil, errors.New("field severity is required")
+		}
+		severity, err := parseMessageSeverity(severityObj)
+		if err != nil {
+			return nil, err
+		}
+		id |= severity
+		if _, ok := messages[id]; ok {
+			return nil, errors.New(fmt.Sprintf("field duplicate message with ID %x", id))
+		}
+		messageTextObj, ok := messageJson["messageText"]
+		if !ok {
+			return nil, errors.New("field messageText is required")
+		}
+		messageText, ok := messageTextObj.(string)
+		if !ok {
+			return nil, errors.New("field messageText must specify a string")
+		}
+		messages[id] = messageText
+	}
+	return &Resource{
+		Type: gowin32.ResourceTypeMessageTable,
+		Id:   1,
+		Data: EncodeMessageTable(messages),
+	}, nil
+}
+
 func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resource, error) {
 	locale := gowin32.LocaleNeutral
 	if languageObj, ok := jsonData["language"]; ok {
@@ -292,6 +356,16 @@ func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resou
 				}
 			} else {
 				return 0, nil, errors.New("field version must specify an object")
+			}
+		case "messageTable":
+			if messageJson, ok := value.([]interface{}); ok {
+				if messageRes, err := parseMessageTableResource(messageJson); err != nil {
+					return 0, nil, err
+				} else {
+					resources = append(resources, messageRes)
+				}
+			} else {
+				return 0, nil, errors.New("field messageTable must specify a list of objects")
 			}
 		case "language":
 			// handled above
