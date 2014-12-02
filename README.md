@@ -28,7 +28,7 @@ are optional and may be omitted if not needed.
 			{
 				"id": 1,
 				"severity": "Error", // also supported: "Success", "Informational", "Warning"
-				"messageText": "Hello, World!"
+				"messageText": "Hello, %1!"
 			}
 		],
 		"version": {
