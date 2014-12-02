@@ -187,7 +187,7 @@ func parseFileSubtype(fileSubtypeObj interface{}) (uint32, error) {
 }
 
 func parseVersionResource(versionJson map[string]interface{}, language gowin32.Language) (*Resource, error) {
-	fixedFileInfo := wrappers.VSFixedFileInfo{
+	fixedFileInfo := wrappers.VS_FIXEDFILEINFO{
 		Signature:     0xFEEF04BD,
 		FileFlagsMask: 0x0000003F,
 	}
@@ -196,8 +196,8 @@ func parseVersionResource(versionJson map[string]interface{}, language gowin32.L
 			if fileVersionNumber, err := gowin32.StringToFileVersionNumber(fileVersionStr); err != nil {
 				return nil, errors.New(fmt.Sprintf("invalid version number: %s", fileVersionStr))
 			} else {
-				fixedFileInfo.FileVersionMS = wrappers.MakeLong(fileVersionNumber.Minor, fileVersionNumber.Major)
-				fixedFileInfo.FileVersionLS = wrappers.MakeLong(fileVersionNumber.Revision, fileVersionNumber.Build)
+				fixedFileInfo.FileVersionMS = wrappers.MAKELONG(fileVersionNumber.Minor, fileVersionNumber.Major)
+				fixedFileInfo.FileVersionLS = wrappers.MAKELONG(fileVersionNumber.Revision, fileVersionNumber.Build)
 			}
 		} else {
 			return nil, errors.New("field fileVersion must specify a string")
@@ -208,8 +208,8 @@ func parseVersionResource(versionJson map[string]interface{}, language gowin32.L
 			if productVersionNumber, err := gowin32.StringToFileVersionNumber(productVersionStr); err != nil {
 				return nil, errors.New(fmt.Sprintf("invalid version number: %s", productVersionStr))
 			} else {
-				fixedFileInfo.ProductVersionMS = wrappers.MakeLong(productVersionNumber.Minor, productVersionNumber.Major)
-				fixedFileInfo.ProductVersionLS = wrappers.MakeLong(productVersionNumber.Revision, productVersionNumber.Build)
+				fixedFileInfo.ProductVersionMS = wrappers.MAKELONG(productVersionNumber.Minor, productVersionNumber.Major)
+				fixedFileInfo.ProductVersionLS = wrappers.MAKELONG(productVersionNumber.Revision, productVersionNumber.Build)
 			}
 		}
 	}

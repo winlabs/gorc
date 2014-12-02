@@ -74,7 +74,7 @@ func EncodeMessageTable(messages map[uint32]string) []byte {
 		} else {
 			nullByteCount = 2
 		}
-		var entryHeader wrappers.MessageResourceEntry
+		var entryHeader wrappers.MESSAGE_RESOURCE_ENTRY
 		entryHeader.Length = uint16(unsafe.Sizeof(entryHeader)) + uint16(textByteLength) + nullByteCount
 		entryHeader.Flags = 1
 		entry := make([]byte, entryHeader.Length)
@@ -90,12 +90,12 @@ func EncodeMessageTable(messages map[uint32]string) []byte {
 	}
 
 	// build the file header
-	header := wrappers.MessageResourceData{
+	header := wrappers.MESSAGE_RESOURCE_DATA{
 		NumberOfBlocks: uint32(len(blockLengths)),
 	}
 
 	// build the block headers
-	blocks := make([]wrappers.MessageResourceBlock, len(blockLengths))
+	blocks := make([]wrappers.MESSAGE_RESOURCE_BLOCK, len(blockLengths))
 	headerLength := uint32(unsafe.Sizeof(header) + unsafe.Sizeof(blocks[0])*uintptr(len(blocks)))
 	offset := headerLength
 	entryIndex := 0
