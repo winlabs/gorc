@@ -39,7 +39,7 @@ type vsVersionInfo struct {
 	Type        uint16
 	Key         [16]uint16
 	Padding     uint16
-	Value       wrappers.VSFixedFileInfo
+	Value       wrappers.VS_FIXEDFILEINFO
 }
 
 type vsStringFileInfo struct {
@@ -138,7 +138,7 @@ func encodeTranslation(language gowin32.Language, codePage uint32) []byte {
 	info.ValueLength = uint16(unsafe.Sizeof(info.Value))
 	info.Type = 0
 	copy(info.Key[:], syscall.StringToUTF16("Translation"))
-	info.Value = wrappers.MakeLong(uint16(language), uint16(codePage))
+	info.Value = wrappers.MAKELONG(uint16(language), uint16(codePage))
 	data := make([]byte, unsafe.Sizeof(info))
 	wrappers.RtlMoveMemory(&data[0], (*byte)(unsafe.Pointer(&info)), unsafe.Sizeof(info))
 	return data
@@ -156,7 +156,7 @@ func encodeVarFileInfo(language gowin32.Language, codePage uint32) []byte {
 	return append(data, extraData...)
 }
 
-func EncodeVersionInfo(fixedInfo *wrappers.VSFixedFileInfo, language gowin32.Language, codePage uint32, stringInfo []VersionString) []byte {
+func EncodeVersionInfo(fixedInfo *wrappers.VS_FIXEDFILEINFO, language gowin32.Language, codePage uint32, stringInfo []VersionString) []byte {
 	stringData := encodeStringFileInfo(language, codePage, stringInfo)
 	varData := encodeVarFileInfo(language, codePage)
 	var info vsVersionInfo
