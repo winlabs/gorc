@@ -26,7 +26,7 @@ import (
 
 type Resource struct {
 	Type gowin32.ResourceType
-	Id	 uint16
+	Id	 uint
 	Data []byte
 }
 
@@ -196,8 +196,12 @@ func parseVersionResource(versionJson map[string]interface{}, language gowin32.L
 			if fileVersionNumber, err := gowin32.StringToFileVersionNumber(fileVersionStr); err != nil {
 				return nil, errors.New(fmt.Sprintf("invalid version number: %s", fileVersionStr))
 			} else {
-				fixedFileInfo.FileVersionMS = wrappers.MAKELONG(fileVersionNumber.Minor, fileVersionNumber.Major)
-				fixedFileInfo.FileVersionLS = wrappers.MAKELONG(fileVersionNumber.Revision, fileVersionNumber.Build)
+				fixedFileInfo.FileVersionMS = wrappers.MAKELONG(
+					uint16(fileVersionNumber.Minor),
+					uint16(fileVersionNumber.Major))
+				fixedFileInfo.FileVersionLS = wrappers.MAKELONG(
+					uint16(fileVersionNumber.Revision),
+					uint16(fileVersionNumber.Build))
 			}
 		} else {
 			return nil, errors.New("field fileVersion must specify a string")
@@ -208,8 +212,12 @@ func parseVersionResource(versionJson map[string]interface{}, language gowin32.L
 			if productVersionNumber, err := gowin32.StringToFileVersionNumber(productVersionStr); err != nil {
 				return nil, errors.New(fmt.Sprintf("invalid version number: %s", productVersionStr))
 			} else {
-				fixedFileInfo.ProductVersionMS = wrappers.MAKELONG(productVersionNumber.Minor, productVersionNumber.Major)
-				fixedFileInfo.ProductVersionLS = wrappers.MAKELONG(productVersionNumber.Revision, productVersionNumber.Build)
+				fixedFileInfo.ProductVersionMS = wrappers.MAKELONG(
+					uint16(productVersionNumber.Minor),
+					uint16(productVersionNumber.Major))
+				fixedFileInfo.ProductVersionLS = wrappers.MAKELONG(
+					uint16(productVersionNumber.Revision),
+					uint16(productVersionNumber.Build))
 			}
 		}
 	}
