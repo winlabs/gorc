@@ -22,6 +22,8 @@ import (
 
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os"
 )
 
 type Resource struct {
@@ -339,6 +341,23 @@ func parseMessageTableResource(messageTableJson []interface{}) (*Resource, error
 	}, nil
 }
 
+func loadManifestResource(manifestFileName string) (*Resource, error) {
+	f, err := os.Open(manifestFileName)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("could not open file '%s'", manifestFileName))
+	}
+	defer f.Close()
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("could not read file '%s'", manifestFileName))
+	}
+	return &Resource{
+		Type: gowin32.ResourceTypeManifest,
+		Id:   1,
+		Data: data,
+	}, nil
+}
+
 func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resource, error) {
 	locale := gowin32.LocaleNeutral
 	if languageObj, ok := jsonData["language"]; ok {
@@ -374,6 +393,16 @@ func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resou
 				}
 			} else {
 				return 0, nil, errors.New("field messageTable must specify a list of objects")
+			}
+		case "manifest":
+			if manifestFileName, ok := value.(string); ok {
+				if manifestRes, err := loadManifestResource(manifestFileName); err != nil {
+					return 0, nil, err
+				} else {
+					resources = append(resources, manifestRes)
+				}
+			} else {
+				return 0, nil, errors.New("field manifest must specify a file name")
 			}
 		case "language":
 			// handled above
