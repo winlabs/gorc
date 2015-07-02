@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 )
 
 type Resource struct {
@@ -353,12 +354,12 @@ func loadManifestResource(manifestFileName string) (*Resource, error) {
 	}
 	return &Resource{
 		Type: gowin32.ResourceTypeManifest,
-		Id:   1,
+		Id:   uint(wrappers.CREATEPROCESS_MANIFEST_RESOURCE_ID),
 		Data: data,
 	}, nil
 }
 
-func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resource, error) {
+func ParseResources(jsonData map[string]interface{}, sourceDir string) (gowin32.Language, []*Resource, error) {
 	locale := gowin32.LocaleNeutral
 	if languageObj, ok := jsonData["language"]; ok {
 		if languageName, ok := languageObj.(string); ok {
@@ -396,7 +397,7 @@ func ParseResources(jsonData map[string]interface{}) (gowin32.Language, []*Resou
 			}
 		case "manifest":
 			if manifestFileName, ok := value.(string); ok {
-				if manifestRes, err := loadManifestResource(manifestFileName); err != nil {
+				if manifestRes, err := loadManifestResource(filepath.Join(sourceDir, manifestFileName)); err != nil {
 					return 0, nil, err
 				} else {
 					resources = append(resources, manifestRes)

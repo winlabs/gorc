@@ -23,6 +23,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 var (
@@ -44,6 +45,18 @@ func main() {
 		usage()
 	}
 
+	var sourceDir string
+	if filepath.IsAbs(args[0]) {
+		sourceDir = filepath.Dir(args[0])
+	} else {
+		if curDir, err := os.Getwd(); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to get current working directory (%s)", err)
+			os.Exit(2)
+		} else {
+			sourceDir = curDir
+		}
+	}
+
 	jsonFile, err := os.Open(args[0])
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to open JSON file: %s (%s)\n", args[0], err)
@@ -57,7 +70,7 @@ func main() {
 		fmt.Fprintf(os.Stderr, "failed to parse JSON file: %s (%s)\n", args[0], err)
 		os.Exit(2)
 	}
-	language, resources, err := ParseResources(jsonData)
+	language, resources, err := ParseResources(jsonData, sourceDir)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "invalid resources in JSON file: %s (%s)\n", args[0], err)
 		os.Exit(2)
